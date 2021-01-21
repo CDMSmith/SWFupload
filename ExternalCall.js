@@ -22,7 +22,7 @@
          ExternalInterface.call(param1,EscapeMessage(param2));
       }
       
-      private static function EscapeMessage(param1:*) : *
+      private static function EscapeMessage(param1)
       {
          if(typeof param1 === "string")
          {
