@@ -1,4 +1,4 @@
-      class SWFUpload
+class SWFUpload
    {
       
       
