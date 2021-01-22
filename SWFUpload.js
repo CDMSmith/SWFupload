@@ -1679,3 +1679,4 @@ class SWFUpload
       }
    }
 }
+}

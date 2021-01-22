@@ -1,0 +1,5 @@
+var swfupload = {
+   swfupload:function() {
+
+   } 
+}
