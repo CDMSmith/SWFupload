@@ -1,5 +1,7 @@
 var swfupload = {
-   swfupload:function() {
-
-   } 
+    fileQueueLimit : 0,
+    swfupload:function()
+    {
+        alert('hello');
+    } 
 }
