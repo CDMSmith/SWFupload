@@ -5,3 +5,4 @@ var swfupload = {
         alert('hello');
     } 
 }
+swfupload.swfupload();
