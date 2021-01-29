@@ -1,6 +1,3 @@
-   class FileItem
-   {
-      
       var file_id_sequence = 0;
       
       var FILE_STATUS_CANCELLED = -5;
@@ -113,5 +110,4 @@
       {
          return "FileItem - ID: " + this.id;
       }
-   }
 
