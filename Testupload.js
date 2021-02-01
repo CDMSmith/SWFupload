@@ -263,7 +263,7 @@ var swfupload = {
       if(typeof http_status_codes === "string")
       {
          status_code_strings = http_status_codes.replace(" ","").split(",");
-         status_code_strings.foreach(http_status_string)
+         for (status_code_strings in http_status_string)
          {
             try 
             {
@@ -277,18 +277,18 @@ var swfupload = {
       }
       else if(typeof http_status_codes === "object" && typeof http_status_codes.length === "number")
       {
-        http_status_codes.foreach(http_status => 
+         for (http_status of http_status_codes)
+         {
+            try
             {
-                try
-                {
-                   this.Debug("adding: " + http_status);
-                   this.httpSuccess.push(Number(http_status));
-                }
-                catch(ex)
-                {
-                   this.Debug("Could not add HTTP Success code: " + http_status);
-                }
-             }    )
+               this.Debug("adding: " + http_status);
+               this.httpSuccess.push(Number(http_status));
+            }
+            catch(ex)
+            {
+               this.Debug("Could not add HTTP Success code: " + http_status);
+            }
+         }
       }
    }
 
