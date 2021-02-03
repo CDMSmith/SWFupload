@@ -5,6 +5,7 @@ var swfupload = {
     file_index : [],
     valid_file_extensions : [],
     filePostName : "",
+    
 
 
     swfupload:function()
@@ -137,86 +138,14 @@ var swfupload = {
         {
            this.SetAssumeSuccessTimeout(0);
         }
-        try
-        {
-           this.SetButtonDimensions(Number(root.loaderInfo.parameters.buttonWidth),Number(root.loaderInfo.parameters.buttonHeight));
-        }
-        catch(ex)
-        {
-           this.SetButtonDimensions(0,0);
-        }
-        try
-        {
-           this.SetButtonImageURL(String(root.loaderInfo.parameters.buttonImageURL));
-        }
-        catch(ex)
-        {
-           this.SetButtonImageURL("");
-        }
-        try
-        {
-           this.SetButtonText(String(root.loaderInfo.parameters.buttonText));
-        }
-        catch(ex)
-        {
-           this.SetButtonText("");
-        }
-        try
-        {
-           this.SetButtonTextPadding(Number(root.loaderInfo.parameters.buttonTextLeftPadding),Number(root.loaderInfo.parameters.buttonTextTopPadding));
-        }
-        catch(ex)
-        {
-           this.SetButtonTextPadding(0,0);
-        }
-        try
-        {
-           this.SetButtonTextStyle(String(root.loaderInfo.parameters.buttonTextStyle));
-        }
-        catch(ex)
-        {
-           this.SetButtonTextStyle("");
-        }
-        try
-        {
-           this.SetButtonAction(Number(root.loaderInfo.parameters.buttonAction));
-        }
-        catch(ex)
-        {
-           this.SetButtonAction(this.BUTTON_ACTION_SELECT_FILES);
-        }
-        try
-        {
-           this.SetButtonDisabled(root.loaderInfo.parameters.buttonDisabled == "true"?true:false);
-        }
-        catch(ex)
-        {
-           this.SetButtonDisabled(Boolean(false));
-        }
-        try
-        {
-           this.SetButtonCursor(Number(root.loaderInfo.parameters.buttonCursor));
-        }
-        catch(ex)
-        {
-           this.SetButtonCursor(this.BUTTON_CURSOR_ARROW);
-        }
-        this.SetupExternalInterface();
-        this.Debug("SWFUpload Init Complete");
-        this.PrintDebugInfo();
-        if(ExternalCall.Bool(this.testExternalInterface_Callback))
-        {
-           ExternalCall.Simple(this.flashReady_Callback);
-           this.hasCalledFlashReady = true;
-        }
-        oSelf = this;
-        this.restoreExtIntTimer = new Timer(1000,0);
-        this.restoreExtIntTimer.addEventListener(TimerEvent.TIMER,function()
-        {
-           oSelf.CheckExternalInterface();
-        });
-        this.restoreExtIntTimer.start();
-    }, 
+
+      //  this.Debug("SWFUpload Init Complete");
+      //  this.PrintDebugInfo();
+    },
+    SetAssumeSuccessTimeout:function(param1)
+    {
+       this.assumeSuccessTimeout = param1 < 0?Number(0):Number(param1);
+    },
     SetFileQueueLimit:function(param1)
     {
        if(param1 < 0)
@@ -252,6 +181,174 @@ var swfupload = {
          this.valid_file_extensions.push(_loc4_);
          _loc3_++;
       }
+   },
+   CheckFileType:function(param1)
+   {
+      if(this.valid_file_extensions.length == 0)
+      {
+         return true;
+      }
+      var _loc2_ = param1.file_reference;
+      var _loc3_ = _loc2_.name.lastIndexOf(".");
+      var _loc4_ = "";
+      if(_loc3_ >= 0)
+      {
+         _loc4_ = _loc2_.name.substr(_loc3_ + 1).toLowerCase();
+      }
+      var _loc5_ = false;
+      var _loc6_ = 0;
+      while(_loc6_ < this.valid_file_extensions.length)
+      {
+         if(String(this.valid_file_extensions[_loc6_]) == _loc4_)
+         {
+            _loc5_ = true;
+            break;
+         }
+         _loc6_++;
+      }
+      return _loc5_;
+   },
+   CheckFileSize:function(param1)
+   {
+  //    if(param1.file_reference)
+   //   {
+   //      return this.SIZE_ZERO_BYTE;
+   //   }
+   //   if(this.fileSizeLimit != 0 && param1.file_reference.size > this.fileSizeLimit)
+   //   {
+   //      return this.SIZE_TOO_BIG;
+   //   }
+      return this.SIZE_OK;
+   },
+   Select_Handler:function(param1)
+   {
+      var _loc4_ = NaN;
+      var _loc5_ = NaN;
+      var _loc6_ = null;
+      var _loc7_ = null;
+      var _loc8_ = false;
+      var _loc9_ = NaN;
+      var _loc10_ = false;
+      this.Debug("Select Handler: Received the files selected from the dialog. Processing the file list...");
+      var _loc2_ = 0;
+      var _loc3_ = 0;
+      if(this.fileUploadLimit == 0)
+      {
+         _loc3_ = this.fileQueueLimit == 0?Number(param1.length):Number(this.fileQueueLimit - this.queued_uploads);
+      }
+      else
+      {
+         _loc4_ = this.fileUploadLimit - this.successful_uploads - this.queued_uploads;
+         if(_loc4_ < 0)
+         {
+            _loc4_ = 0;
+         }
+         if(this.fileQueueLimit == 0 || this.fileQueueLimit >= _loc4_)
+         {
+            _loc3_ = _loc4_;
+         }
+         else if(this.fileQueueLimit < _loc4_)
+         {
+            _loc3_ = this.fileQueueLimit - this.queued_uploads;
+         }
+      }
+      if(_loc3_ < 0)
+      {
+         _loc3_ = 0;
+      }
+      if(_loc3_ < param1.length)
+      {
+         this.Debug("Event: fileQueueError : Selected Files (" + param1.length + ") exceeds remaining Queue size (" + _loc3_ + ").");
+         ExternalCall.FileQueueError(this.fileQueueError_Callback,this.ERROR_CODE_QUEUE_LIMIT_EXCEEDED,null,_loc3_.toString());
+      }
+      else
+      {
+         _loc5_ = 0;
+         while(_loc5_ < param1.length)
+         {
+            _loc6_ = new FileItem(param1[_loc5_],this.movieName,this.file_index.length);
+            this.file_index[_loc6_.index] = _loc6_;
+            _loc7_ = _loc6_.ToJavaScriptObject();
+            _loc8_ = _loc7_.filestatus !== FileItem.FILE_STATUS_ERROR;
+            if(_loc8_)
+            {
+               _loc9_ = this.CheckFileSize(_loc6_);
+               _loc10_ = this.CheckFileType(_loc6_);
+               if(_loc9_ == this.SIZE_OK && _loc10_)
+               {
+                  _loc6_.file_status = FileItem.FILE_STATUS_QUEUED;
+                  this.file_queue.push(_loc6_);
+                  this.queued_uploads++;
+                  _loc2_++;
+                  this.Debug("Event: fileQueued : File ID: " + _loc6_.id);
+                  ExternalCall.FileQueued(this.fileQueued_Callback,_loc6_.ToJavaScriptObject());
+               }
+               else if(!_loc10_)
+               {
+                  _loc6_.file_reference = null;
+                  this.queue_errors++;
+                  this.Debug("Event: fileQueueError : File not of a valid type.");
+                  ExternalCall.FileQueueError(this.fileQueueError_Callback,this.ERROR_CODE_INVALID_FILETYPE,_loc6_.ToJavaScriptObject(),"File is not an allowed file type.");
+               }
+               else if(_loc9_ == this.SIZE_TOO_BIG)
+               {
+                  _loc6_.file_reference = null;
+                  this.queue_errors++;
+                  this.Debug("Event: fileQueueError : File exceeds size limit.");
+                  ExternalCall.FileQueueError(this.fileQueueError_Callback,this.ERROR_CODE_FILE_EXCEEDS_SIZE_LIMIT,_loc6_.ToJavaScriptObject(),"File size exceeds allowed limit.");
+               }
+               else if(_loc9_ == this.SIZE_ZERO_BYTE)
+               {
+                  _loc6_.file_reference = null;
+                  this.queue_errors++;
+                  this.Debug("Event: fileQueueError : File is zero bytes.");
+                  ExternalCall.FileQueueError(this.fileQueueError_Callback,this.ERROR_CODE_ZERO_BYTE_FILE,_loc6_.ToJavaScriptObject(),"File is zero bytes and cannot be uploaded.");
+               }
+            }
+            else
+            {
+               _loc6_.file_reference = null;
+               this.queue_errors++;
+               this.Debug("Event: fileQueueError : File is zero bytes or FileReference is invalid.");
+               ExternalCall.FileQueueError(this.fileQueueError_Callback,this.ERROR_CODE_ZERO_BYTE_FILE,_loc6_.ToJavaScriptObject(),"File is zero bytes or cannot be accessed and cannot be uploaded.");
+            }
+            _loc5_++;
+         }
+      }
+      this.Debug("Event: fileDialogComplete : Finished processing selected files. Files selected: " + param1.length + ". Files Queued: " + _loc2_);
+      ExternalCall.FileDialogComplete(this.fileDialogComplete_Callback,param1.length,_loc2_,this.queued_uploads);
+   },
+   GetFile:function(param1)
+   {
+      var _loc3_ = null;
+      var _loc4_ = NaN;
+      var _loc2_ = this.FindIndexInFileQueue(param1);
+      if(_loc2_ >= 0)
+      {
+         _loc3_ = this.file_queue[_loc2_];
+      }
+      else if(this.current_file_item != null)
+      {
+         _loc3_ = this.current_file_item;
+      }
+      else
+      {
+         _loc4_ = 0;
+         while(_loc4_ < this.file_queue.length)
+         {
+            _loc3_ = this.file_queue[_loc4_];
+            if(_loc3_ != null)
+            {
+               break;
+            }
+            _loc4_++;
+         }
+      }
+      if(_loc3_ == null)
+      {
+         return null;
+      }
+      return _loc3_.ToJavaScriptObject();
    },
     SetHTTPSuccess:function(param1)
    {
@@ -311,7 +408,7 @@ var FileItem = {
            "id":this.id,
            "index":this.index
         };
-        console.log('size=' + file_reference);
+        console.log('size=' + file_reference.size);
         console.log('type=' + this.id);
         console.log('name=' + index);
         try
@@ -327,7 +424,9 @@ var FileItem = {
            this.file_status = FileItem.FILE_STATUS_ERROR;
         }
         this.js_object.filestatus = this.file_status;
+    },      
+   toString:function()
+    {
+       return "FileItem - ID: " + this.id;
     }
 }
-FileItem.FileItem('foo','3','bar');
-swfupload.swfupload();
